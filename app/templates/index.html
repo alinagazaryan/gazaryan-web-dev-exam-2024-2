@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block user_name %}
+    <p>
+        {{ user_obj.last_name }} 
+        {{user_obj.first_name}} 
+        {% if user_obj.middle_name != none %}
+            {{user_obj.middle_name}}
+        {% endif %}
+    </p>
+{% endblock %}
+
+{% block content %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Жанр(ы)</th>
+                <th>Год</th>
+                <th>Средняя оценка</th>
+                <th>Кол-во рецензий</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for book in books_list %}
+                <tr class="book_row">
+                    <td>{{ book.name }}</td>
+                    <td>
+                        {% for genre in genre_list %}
+                            {{ genre.name }}
+                        {% endfor %}
+                    </td>
+                    <td>{{ book.year }}</td>
+                    <td>{{ average_score }}</td>
+                    <td>{{ number_of_reviews }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

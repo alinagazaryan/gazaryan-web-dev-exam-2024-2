@@ -1,0 +1,15 @@
+.logo {
+    max-width: 175px;
+}
+
+.header-right-side {
+    display: flex;
+}
+
+.fio-container {
+    transform: translate(-10%, 20%);
+}
+
+.fio-container p {
+    color: white;
+}
