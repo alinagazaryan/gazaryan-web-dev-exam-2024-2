@@ -35,7 +35,7 @@ class Book(db.Model):
     id: Mapped[int]=mapped_column(primary_key=True)
     name: Mapped[str]=mapped_column(String(100), primary_key=True)
     short_desc: Mapped[str]=mapped_column(Text, nullable=False)
-    # year: Mapped[int]=mapped_column(Date, nullable=False)
+    year: Mapped[int]=mapped_column(String(10), nullable=False)
     publisher: Mapped[str]=mapped_column(String(100), nullable=False)
     author: Mapped[str]=mapped_column(String(100), nullable=False)
     volume: Mapped[int]=mapped_column(nullable=False)

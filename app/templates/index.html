@@ -1,41 +1,49 @@
 {% extends 'base.html' %}
 
-{% block user_name %}
-    <p>
-        {{ user_obj.last_name }} 
-        {{user_obj.first_name}} 
-        {% if user_obj.middle_name != none %}
-            {{user_obj.middle_name}}
-        {% endif %}
-    </p>
-{% endblock %}
-
 {% block content %}
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Название</th>
-                <th>Жанр(ы)</th>
-                <th>Год</th>
-                <th>Средняя оценка</th>
-                <th>Кол-во рецензий</th>
-            </tr>
-        </thead>
+    <div class="main container-fluid">
+        <h1 class="my-5">Список книг</h1>
 
-        <tbody>
-            {% for book in books_list %}
-                <tr class="book_row">
-                    <td>{{ book.name }}</td>
-                    <td>
-                        {% for genre in genre_list %}
-                            {{ genre.name }}
-                        {% endfor %}
-                    </td>
-                    <td>{{ book.year }}</td>
-                    <td>{{ average_score }}</td>
-                    <td>{{ number_of_reviews }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <div class="container-fluid">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th class="th-name" scope="col">Название</th>
+                        <th scope="col">Жанр(ы)</th>
+                        <th scope="col">Год</th>
+                        <th class="th-mark" scope="col">Средняя оценка</th>
+                        <th class="th-reviews" scope="col">Кол-во рецензий</th>
+                        <th scope="col">Действия</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in data%}
+                        <tr>
+                            <td>{{ item.get('book_name') }}</td>
+                            <td>{{ item.get('genres') }}</td>
+                            <td>{{ item.get('book_year') }}</td>
+                            <td>{{ item.get('average_score') }}</td>
+                            <td>{{ item.get('number_of_reviews') }}</td>
+                            <td class="td-buttons">
+                                <a class="btn btn-success btn-sm" href="#">Просмотр</a>
+                                <a class="btn btn-primary btn-sm" href="{{ url_for('book.edit', book_id=item.get('book_id')) }}">Редактирование</a>
+                                <a class="btn btn-danger btn-sm" href="#">Удаление</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mb-5">
+            <p style="text-align: center;">Пагинация</p>
+        </div>
+
+        {% if current_user.is_authenticated and current_user.role_id == 1 %}
+            <div class="text-center my-3">
+                <a class="btn btn-secondary" href="{{ url_for('book.new') }}">Добавить книгу</a>
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}

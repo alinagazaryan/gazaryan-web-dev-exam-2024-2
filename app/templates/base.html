@@ -17,15 +17,20 @@
             <div class="container-fluid">
                 <div class="logo navbar-brand">
                     <a href="{{ url_for('index') }}">
-                        <img class="img-fluid" src="{{ url_for('static', filename='images/polytech_logo.png') }}" alt="polytech-logo">
+                        <img class="img-fluid" src="{{ url_for('static', filename='images/logo.png') }}" alt="polytech-logo">
                     </a>
                 </div>
             
                 <div class="header-right-side">
                     {% if current_user.is_authenticated %}
                         <div class="fio-container">
-                            {% block user_name %}
-                            {% endblock %}
+                            <p>
+                                {{ current_user.last_name }} 
+                                {{ current_user.first_name }} 
+                                {% if current_user.middle_name != none %}
+                                    {{ current_user.middle_name }}
+                                {% endif %}
+                            </p>
                         </div>
                         <div>
                             <a class="btn btn-danger" href="{{ url_for('auth.logout') }}">Выйти</a>
@@ -60,4 +65,6 @@
     <footer class="bg-secondary text-white d-flex align-items-center justify-content-center py-3">
         &copy; Газарян Алина Александровна, студентка группы 211-332
     </footer>
+
+    <script defer src="{{ url_for('static', filename='main.js') }}"></script>
 </body>

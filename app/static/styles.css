@@ -1,5 +1,5 @@
 .logo {
-    max-width: 175px;
+    max-width: 50px;
 }
 
 .header-right-side {
@@ -12,4 +12,29 @@
 
 .fio-container p {
     color: white;
+}
+
+.main h1 {
+    text-align: center;
+}
+
+.th-name {
+    width: 300px;
+}
+
+.th-mark {
+    width: 150px;
+}
+
+.th-reviews {
+    width: 155px;
+}
+
+.td-buttons {
+    width: 325px;
+}
+
+.background-preview {
+    border: 3px dashed grey;
+    flex-grow: 1;
 }

@@ -21,10 +21,11 @@ def login():
     if request.method == 'POST':
         login = request.form.get('login')
         password = request.form.get('password')
+        check_remember = True if request.form.get('remember_me') else False 
         if login and password:
             user = db.session.execute(db.select(User).filter_by(login=login)).scalar()
             if user and user.check_password(password):
-                login_user(user)
+                login_user(user, remember=check_remember)
                 flash('Вы успешно аутентифицированы.', 'success')
                 next = request.args.get('next')
                 return redirect(next or url_for('index'))
