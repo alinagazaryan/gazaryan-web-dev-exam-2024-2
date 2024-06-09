@@ -1,13 +1,14 @@
-import os
+import os, markdown
 from flask import url_for
 from datetime import datetime
 from sqlalchemy import MetaData
 from typing import Optional, List
 from flask_login import UserMixin
+from users_policy import UsersPolicy
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.security import check_password_hash
-from sqlalchemy import String, Text, Date, ForeignKey
+from sqlalchemy import String, Text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 RATING_WORDS={
@@ -33,7 +34,7 @@ db=SQLAlchemy(model_class=Base)
 class Book(db.Model):
     __tablename__='books'
     id: Mapped[int]=mapped_column(primary_key=True)
-    name: Mapped[str]=mapped_column(String(100), primary_key=True)
+    name: Mapped[str]=mapped_column(String(100), unique=True)
     short_desc: Mapped[str]=mapped_column(Text, nullable=False)
     year: Mapped[int]=mapped_column(String(10), nullable=False)
     publisher: Mapped[str]=mapped_column(String(100), nullable=False)
@@ -43,10 +44,14 @@ class Book(db.Model):
 
     review_of_book: Mapped[List['Review']]=relationship(back_populates='book')
 
+    @property
+    def markdown_desc(self):
+        return markdown.markdown(self.short_desc)
+
 class Genre(db.Model):
     __tablename__='genres'
     id: Mapped[int]=mapped_column(primary_key=True)
-    name: Mapped[str]=mapped_column(String(100), unique=True)
+    name: Mapped[str]=mapped_column(String(100), unique=True, nullable=False)
 
 class LinkTableBookGenre(db.Model):
     __tablename__='book_genres'
@@ -56,7 +61,7 @@ class LinkTableBookGenre(db.Model):
 
 class Image(db.Model):
     __tablename__='images'
-    id: Mapped[int]=mapped_column(primary_key=True)
+    id: Mapped[str]=mapped_column(String(100), primary_key=True)
     file_name: Mapped[str]=mapped_column(String(100), nullable=False)
     mime_type: Mapped[str]=mapped_column(String(100), nullable=False)
     md5_hash: Mapped[str]=mapped_column(String(256), nullable=False, unique=True)
@@ -73,18 +78,33 @@ class Image(db.Model):
 class User(db.Model, UserMixin):
     __tablename__='users'
     id: Mapped[int]=mapped_column(primary_key=True)
-    first_name: Mapped[str]=mapped_column(String(100))
-    last_name: Mapped[str]=mapped_column(String(100))
+    first_name: Mapped[str]=mapped_column(String(100), nullable=False)
+    last_name: Mapped[str]=mapped_column(String(100), nullable=False)
     middle_name: Mapped[Optional[str]]=mapped_column(String(100), nullable=True)
-    login: Mapped[str]=mapped_column(String(100), unique=True)
-    password_hash: Mapped[str]=mapped_column(String(256))
+    login: Mapped[str]=mapped_column(String(100), unique=True, nullable=False)
+    password_hash: Mapped[str]=mapped_column(String(256), nullable=False)
+
     role_id: Mapped[int]=mapped_column(ForeignKey('roles.id'))
+    role: Mapped['Role']=relationship(back_populates='user_role')
 
     user_review: Mapped[List['Review']]=relationship(back_populates='user')
 
     @property
     def full_name(self):
         return ' '.join([self.last_name, self.first_name, self.middle_name or ''])
+    
+    @property
+    def is_admin(self):
+        return self.role.name == 'Администратор'
+
+    @property
+    def is_moder(self):
+        return (self.role.name == 'Администратор' or self.role.name == 'Модератор')
+    
+    def can(self, action, record = None):
+        users_policy = UsersPolicy(record)
+        method = getattr(users_policy, action, None)
+        return method() if method else False
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -94,6 +114,8 @@ class Role(db.Model):
     id: Mapped[int]=mapped_column(primary_key=True)
     name: Mapped[str]=mapped_column(String(100), nullable=False)
     desc: Mapped[str]=mapped_column(Text, nullable=False)
+
+    user_role: Mapped['User'] = relationship(back_populates='role')
 
 class Review(db.Model):
     __tablename__='reviews'
@@ -110,4 +132,8 @@ class Review(db.Model):
 
     @property
     def rating_word(self):
-        return RATING_WORDS.get(self.rating)
+        return RATING_WORDS.get(self.mark)
+    
+    @property
+    def markdown_review(self):
+        return markdown.markdown(self.text)

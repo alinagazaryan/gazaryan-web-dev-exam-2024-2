@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="title-area position-relative">
+    <div class="h-100 w-100 py-5 d-flex text-center position-relative">
+        <div class="m-auto">
+            <h1 class="title mb-5 font-weight-bold">{{ book.name }}</h1>
+            <img src="{{ url_for('image', image_id=book.cover_id) }}" alt="Cover of book" height="400">
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <section class="add-review my-5">
+        <h2 class="mb-3 text-center text-uppercase font-weight-bold">Написать рецензию</h2>
+        <form action="#" method="POST">
+            <textarea class="form-control my-3 px-2 ms-3" id="review-text" name="text" rows="3"></textarea>
+
+            <div class="d-flex align-items-center gap-3 w-100">
+                <select class="form-select ms-3 my-3" id="review-rating" name="mark">
+                    <option value="5" selected>Отлично</option>
+                    <option value="4">Хорошо</option>
+                    <option value="3">Удовлетворительно</option>
+                    <option value="2">Неудовлетворительно</option>
+                    <option value="1">Плохо</option>
+                    <option value="0">Ужасно</option>
+                </select>
+
+                <div class="add-review-button">
+                    <button type="submit" class="btn btn-primary mb-3 ms-3 me-auto">Отправить</button>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>
+
+{% endblock %}

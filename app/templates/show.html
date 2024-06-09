@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="title-area position-relative">
+    <div class="h-100 w-100 py-5 d-flex text-center position-relative">
+        <div class="m-auto">
+            <h1 class="title mb-5 font-weight-bold">{{ book.name }}</h1>
+            <img src="{{ url_for('image', image_id=book.cover_id) }}" alt="Cover of book" height="400">
+            <p class="my-3 mx-auto">
+                Рейтинг | <span>★</span> <span>{{ average_score }}</span>
+            </p>
+            <div class="container">
+                <div class="book-desc">
+                    <h2 class="desc mt-5 mb-3">Описание книги</h2>
+                    <p class="description w-75 mb-5 mx-auto">
+                        {{ book.markdown_desc | safe }}
+                    </p>
+                </div>
+
+                <div class="book-info">
+                    <h2 class="info mt-5 mb-4">Сведения о книге</h2>
+                    <div class="row">
+                        <p class="year w-50">
+                            <b>Год издания: </b>{{ book.year }} год
+                        </p>
+                        <p class="publisher w-50">
+                            <b>Издательство: </b>{{ book.publisher }}
+                        </p>
+                    </div>
+
+                    <div class="row">
+                        <p class="year w-50">
+                            <b>Автор: </b>{{ book.author }}
+                        </p>
+                        <p class="publisher w-50">
+                            <b>Объем книги: </b>{{ book.volume }} страниц
+                        </p>
+                    </div>
+                </div>
+
+                {% if reviews_list | length != 0 %}
+                    <div class="all-reviews">
+                        <h2 class="reviews my-5">Рецензии на книгу</h2>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Имя пользователя</th>
+                                    <th scope="col">Оценка</th>
+                                    <th scope="col">Текст рецензии</th>
+                                </tr>
+                            </thead>
+                                {% for review in reviews_list %}
+                                    <tr>
+                                        <td>{{ review.user.full_name }}</td>
+                                        <td>{{ review.rating_word }}</td>
+                                        <td>{{ review.markdown_review | safe }}</td>
+                                    </tr>
+                                {% endfor %}
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if current_user.is_authenticated and can_write_review == true %}
+                <div class="button-add-review">
+                    <a class="btn btn-secondary btn-md mt-4" href="{{ url_for('book.review_add', book_id=book.id) }}">Написать рецензию</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

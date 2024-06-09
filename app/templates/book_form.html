@@ -28,7 +28,7 @@
                             id="short_description" 
                             cols="30" 
                             rows="5"
-                            >{% if book != none %}{{ book.short_desc }}{% endif %} </textarea>
+                            >{{ book.short_desc or '' }}</textarea>
                     </div>
                 </div>
                 {% if action=="add" %}
@@ -49,7 +49,7 @@
                             <select class="form-select" name="genres_filter" multiple>
                                 <option value="default" selected>Выберите жанр</option>
                                 {% for genre in genres_list %}
-                                    <option value="{{ genre }}">{{ genre }}</option>
+                                    <option value="{{ genre.id }}">{{ genre.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -95,7 +95,7 @@
                             <select class="form-select" name="genres_filter" multiple>
                                 <option value="default" selected>Выберите жанр</option>
                                 {% for genre in genres_list %}
-                                    <option value="{{ genre }}">{{ genre }}</option>
+                                    <option value="{{ genre.id }}">{{ genre.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>

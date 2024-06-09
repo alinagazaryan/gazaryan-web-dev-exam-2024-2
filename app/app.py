@@ -1,6 +1,5 @@
-from books import bp as books_bp
+from book import bp as books_bp
 from flask_migrate import Migrate
-from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
 from auth import bp as auth_bp, init_login_manager
 from flask import Flask, render_template, send_from_directory

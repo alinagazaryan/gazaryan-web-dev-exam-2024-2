@@ -38,3 +38,25 @@
     border: 3px dashed grey;
     flex-grow: 1;
 }
+
+.table th {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.add-review-textarea {
+    display: flex;
+    justify-content: center;
+}
+.add-review select {
+    width: 20%;
+}
+.add-review-button button {
+    margin-bottom: 0px !important;
+    margin-left: 0px !important;
+}

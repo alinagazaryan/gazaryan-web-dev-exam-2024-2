@@ -2,45 +2,55 @@
 
 {% block content %}
     <div class="main container-fluid">
-        <h1 class="my-5">Список книг</h1>
+        {% if data | length != 0 %}
+            <h1 class="my-5">Список книг</h1>
 
-        <div class="container-fluid">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th class="th-name" scope="col">Название</th>
-                        <th scope="col">Жанр(ы)</th>
-                        <th scope="col">Год</th>
-                        <th class="th-mark" scope="col">Средняя оценка</th>
-                        <th class="th-reviews" scope="col">Кол-во рецензий</th>
-                        <th scope="col">Действия</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for item in data%}
+            <div class="container-fluid">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td>{{ item.get('book_name') }}</td>
-                            <td>{{ item.get('genres') }}</td>
-                            <td>{{ item.get('book_year') }}</td>
-                            <td>{{ item.get('average_score') }}</td>
-                            <td>{{ item.get('number_of_reviews') }}</td>
-                            <td class="td-buttons">
-                                <a class="btn btn-success btn-sm" href="#">Просмотр</a>
-                                <a class="btn btn-primary btn-sm" href="{{ url_for('book.edit', book_id=item.get('book_id')) }}">Редактирование</a>
-                                <a class="btn btn-danger btn-sm" href="#">Удаление</a>
-                            </td>
+                            <th class="th-name" scope="col">Название</th>
+                            <th scope="col">Жанр(ы)</th>
+                            <th scope="col">Год</th>
+                            <th class="th-mark" scope="col">Средняя оценка</th>
+                            <th class="th-reviews" scope="col">Кол-во рецензий</th>
+                            <th scope="col">Действия</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                    </thead>
 
-        <div class="mb-5">
-            <p style="text-align: center;">Пагинация</p>
-        </div>
+                    <tbody>
+                        {% for item in data %}
+                            <tr>
+                                <td>{{ item.get('book_name') }}</td>
+                                <td>{{ item.get('genres') }}</td>
+                                <td>{{ item.get('book_year') }}</td>
+                                <td>{{ item.get('average_score') }}</td>
+                                <td>{{ item.get('number_of_reviews') }}</td>
+                                <td class="td-buttons">
+                                    <a class="btn btn-success btn-sm" href="{{ url_for('book.show', book_id=item.get('book_id')) }}">Просмотр</a>
+                                    
+                                    {% if current_user.is_authenticated and current_user.can('edit') %}
+                                        <a class="btn btn-primary btn-sm" href="{{ url_for('book.edit', book_id=item.get('book_id')) }}">Редактирование</a>
+                                    {% endif %}
 
-        {% if current_user.is_authenticated and current_user.role_id == 1 %}
+                                    {% if current_user.is_authenticated and current_user.can('remove') %}
+                                        <a class="btn btn-danger btn-sm" href="#">Удаление</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mb-5">
+                <p style="text-align: center;">Пагинация</p>
+            </div>
+        {% else %}
+            <h1 class="my-5">Тут пока пусто</h1>
+        {% endif %}
+
+        {% if current_user.is_authenticated and current_user.can('add') %}
             <div class="text-center my-3">
                 <a class="btn btn-secondary" href="{{ url_for('book.new') }}">Добавить книгу</a>
             </div>
