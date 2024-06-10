@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from 'pagination.html' import render_pagination %}
 
 {% block content %}
     <div class="main container-fluid">
@@ -34,7 +35,7 @@
                                     {% endif %}
 
                                     {% if current_user.is_authenticated and current_user.can('remove') %}
-                                        <a class="btn btn-danger btn-sm" href="#">Удаление</a>
+                                        <a class="btn btn-danger btn-sm" href="{{ url_for('book.remove', book_id=item.get('book_id')) }}">Удаление</a>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -43,9 +44,12 @@
                 </table>
             </div>
 
-            <div class="mb-5">
-                <p style="text-align: center;">Пагинация</p>
-            </div>
+            {% if 'index' in request.endpoint %}
+                <div class="mb-5">
+                    {{ render_pagination(pagination, request.endpoint) }}
+                </div>
+            {% endif %}
+
         {% else %}
             <h1 class="my-5">Тут пока пусто</h1>
         {% endif %}

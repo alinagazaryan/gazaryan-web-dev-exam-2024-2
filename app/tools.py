@@ -1,10 +1,9 @@
-import hashlib
-import uuid
-import os
-from werkzeug.utils import secure_filename
-from flask import current_app
+import uuid, os, hashlib 
 from models import db, Image
+from flask import current_app
+from werkzeug.utils import secure_filename
 from sqlalchemy.exc import SQLAlchemyError
+from config import UPLOAD_FOLDER
 
 class ImageSaver:
     def __init__(self, file):
@@ -14,10 +13,9 @@ class ImageSaver:
         self.img = self.__find_by_md5_hash()
         if self.img is not None:
             return self.img
-        file_id = str(uuid.uuid4())
-        file_name = secure_filename(f"{file_id}.{self.file.filename.split('.')[1]}")
+        file_name = secure_filename(self.file.filename)
         self.img = Image(
-            id=file_id,
+            id=str(uuid.uuid4()),
             file_name=file_name,
             mime_type=self.file.mimetype,
             md5_hash=self.md5_hash)
@@ -39,3 +37,15 @@ class ImageSaver:
         self.md5_hash = hashlib.md5(self.file.read()).hexdigest()
         self.file.seek(0)
         return db.session.execute(db.select(Image).filter(Image.md5_hash == self.md5_hash)).scalar()
+
+class ImageDeleter:
+    def __init__(self, img):
+        self.img = img
+
+    def delete(self):
+        try:
+            os.remove(os.path.join(UPLOAD_FOLDER, self.img.storage_filename))
+            db.session.delete(self.img)
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()

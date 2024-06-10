@@ -42,7 +42,7 @@ class Book(db.Model):
     volume: Mapped[int]=mapped_column(nullable=False)
     cover_id: Mapped[int]=mapped_column(ForeignKey('images.id'))
 
-    review_of_book: Mapped[List['Review']]=relationship(back_populates='book')
+    review_of_book: Mapped[List['Review']]=relationship(back_populates='book', cascade='all, delete')
 
     @property
     def markdown_desc(self):

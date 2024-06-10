@@ -1,10 +1,10 @@
 import bleach
-from tools import ImageSaver
 from auth import permission_check
 from flask_login import current_user
 from flask_login import login_required
 from sqlalchemy.exc import IntegrityError
-from models import db, Book, Genre, LinkTableBookGenre, Review
+from tools import ImageSaver, ImageDeleter
+from models import db, Book, Genre, LinkTableBookGenre, Review, Image
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 
 bp = Blueprint('book', __name__, url_prefix='/book')
@@ -86,7 +86,8 @@ def show(book_id):
 
     # исключение на то, если пользователь AnonimousUserMixin, т.к. у анонимного юзера нет свойства current_user
     try:
-        can_write_review = not bool(db.session.query(Review).filter(Review.user_id == current_user.id).first())
+        can_write_review = not bool(Review.query.filter_by(
+            user_id=current_user.id).filter_by(book_id=book_id).first())
     except AttributeError:
         can_write_review = False
 
@@ -148,11 +149,38 @@ def edit(book_id):
         genres_list=genres
     )
 
+@bp.route('/<int:book_id>/remove', methods=['GET', 'POST'])
+@login_required
+@permission_check('remove')
+def remove(book_id):
+    book = db.session.query(Book).filter(Book.id == book_id).first()
+
+    book_genres = db.session.query(LinkTableBookGenre).filter(LinkTableBookGenre.book_id == book_id).all()
+
+    image = db.session.query(Image).filter(Image.id == book.cover_id).first()
+
+    image_deleter = ImageDeleter(image)
+
+    try:
+        db.session.delete(book)
+        image_deleter.delete()
+
+        for item in book_genres:
+            db.session.delete(item)
+            
+        db.session.commit()
+    except IntegrityError:
+        flash('Не удалось выполнить удаление книги', 'danger')
+        db.session.rollback()
+        return redirect(url_for('index'))
+
+    return redirect(url_for('index'))
+
 @bp.route('/<int:book_id>/review_add', methods=['GET', 'POST'])
 @login_required
 def review_add(book_id):
     if request.method == 'POST':
-        if db.session.query(Review).filter(Review.user_id == current_user.id).first():
+        if Review.query.filter_by(user_id=current_user.id).filter_by(book_id=book_id).first():
             flash('Вы уже оставляли рецензию на эту книгу.', 'warning')
             return redirect(url_for('book.show', book_id=book_id))
 

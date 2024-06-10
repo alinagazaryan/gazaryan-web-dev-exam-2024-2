@@ -1,9 +1,10 @@
+from config import PER_PAGE
 from book import bp as books_bp
 from flask_migrate import Migrate
 from sqlalchemy.exc import SQLAlchemyError
 from auth import bp as auth_bp, init_login_manager
-from flask import Flask, render_template, send_from_directory
-from models import db, User, Image, Book, Review, LinkTableBookGenre, Genre
+from models import db, Image, Book, Review, LinkTableBookGenre, Genre
+from flask import Flask, render_template, send_from_directory, request
 
 app = Flask(__name__)
 application = app
@@ -26,11 +27,11 @@ app.register_blueprint(books_bp)
 
 @app.route('/')
 def index():
-    books_list = sorted(
-        db.session.execute(db.select(Book)).scalars().all(), 
-        key=lambda x: x.year, reverse=True
-    )
-
+    page = request.args.get('page', 1, type=int)
+    books_list = Book.query.order_by(Book.year.desc())
+    pagination = books_list.paginate(page=page, per_page=PER_PAGE)
+    books_list = pagination.items
+    
     data = list()
 
     for book in books_list:
@@ -64,7 +65,8 @@ def index():
     
     return render_template(
         'index.html', 
-        data=data
+        data=data,
+        pagination=pagination
     )
     
 @app.route('/images/<image_id>')
