@@ -19,6 +19,7 @@ class ImageSaver:
             file_name=file_name,
             mime_type=self.file.mimetype,
             md5_hash=self.md5_hash)
+        self.img.file_name = self.img.storage_filename
         return self.img
     
     def download(self, img):

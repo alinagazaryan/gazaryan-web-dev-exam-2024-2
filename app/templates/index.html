@@ -2,6 +2,33 @@
 {% from 'pagination.html' import render_pagination %}
 
 {% block content %}
+    <!-- Modal -->
+    <div class="modal fade" id="deleteBook" data-bs-backdrop="static" data-bs-keyboard="false"
+    tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Удаление книги</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p>Вы уверены, что хотите удалить книгу <span id="bookName"></span>?</p>
+                    <form class="d-none" action="" method="POST">
+                        <input type="submit" id="deleteBookButton">
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Отмена</button>
+                    <label for="deleteBookButton" class="btn btn-danger">Удалить</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="main container-fluid">
         {% if data | length != 0 %}
             <h1 class="my-5">Список книг</h1>
@@ -22,7 +49,7 @@
                     <tbody>
                         {% for item in data %}
                             <tr>
-                                <td>{{ item.get('book_name') }}</td>
+                                <td id="nameOfBook">{{ item.get('book_name') }}</td>
                                 <td>{{ item.get('genres') }}</td>
                                 <td>{{ item.get('book_year') }}</td>
                                 <td>{{ item.get('average_score') }}</td>
@@ -35,7 +62,15 @@
                                     {% endif %}
 
                                     {% if current_user.is_authenticated and current_user.can('remove') %}
-                                        <a class="btn btn-danger btn-sm" href="{{ url_for('book.remove', book_id=item.get('book_id')) }}">Удаление</a>
+                                    <button 
+                                        class="btn btn-danger btn-sm" 
+                                        id="{{ loop.index }}"
+                                        data-bs-toggle="modal" 
+                                        data-url="{{ url_for('book.remove', book_id=item.get('book_id')) }}" 
+                                        data-bs-target="#deleteBook"
+                                        >
+                                        Удалить
+                                    </button>
                                     {% endif %}
                                 </td>
                             </tr>
