@@ -43,6 +43,7 @@ class Book(db.Model):
     cover_id: Mapped[int]=mapped_column(ForeignKey('images.id'))
 
     review_of_book: Mapped[List['Review']]=relationship(back_populates='book', cascade='all, delete')
+    history_of_book: Mapped[List['History']]=relationship(back_populates='book', cascade='all, delete')
 
     @property
     def markdown_desc(self):
@@ -88,6 +89,7 @@ class User(db.Model, UserMixin):
     role: Mapped['Role']=relationship(back_populates='user_role')
 
     user_review: Mapped[List['Review']]=relationship(back_populates='user')
+    user_actions_history: Mapped[List['History']]=relationship(back_populates='user')
 
     @property
     def full_name(self):
@@ -137,3 +139,14 @@ class Review(db.Model):
     @property
     def markdown_review(self):
         return markdown.markdown(self.text)
+    
+class History(db.Model):
+    __tablename__ = 'histories'
+    id: Mapped[int]=mapped_column(primary_key=True)
+    created_at: Mapped[datetime]=mapped_column(default=datetime.now)
+
+    book_id: Mapped[int]=mapped_column(ForeignKey('books.id'))
+    book: Mapped['Book']=relationship(back_populates="history_of_book")
+    
+    user_id: Mapped[int]=mapped_column(ForeignKey('users.id'))
+    user: Mapped['User']=relationship(back_populates="user_actions_history")

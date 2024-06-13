@@ -1,5 +1,6 @@
 from config import PER_PAGE
 from book import bp as books_bp
+from history import bp as history_bp
 from flask_migrate import Migrate
 from sqlalchemy.exc import SQLAlchemyError
 from auth import bp as auth_bp, init_login_manager
@@ -24,6 +25,7 @@ def handle_sqlalchemy_error(err):
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(books_bp)
+app.register_blueprint(history_bp)
 
 @app.route('/')
 def index():

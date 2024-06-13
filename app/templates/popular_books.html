@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="main container-fluid">
+    <h1 class="my-5">Популярные книги за 3 месяца</h1>
+
+    {% if data | length != 0 %}
+        <div class="container-fluid">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Обложка</th>
+                        <th scope="col">Название</th>
+                        <th scope="col">Автор</th>
+                        <th scope="col">Средняя оценка</th>
+                        <th scope="col">Ссылка на книгу</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in data %}
+                        <tr>
+                            <td>
+                                <img src="{{ url_for('image', image_id=item.get('cover')) }}" alt="Cover of book" height="100">
+                            </td>
+                            <td>{{ item.get('name') }}</td>
+                            <td>{{ item.get('author') }}</td>
+                            <td>{{ item.get('average_score') }}</td>
+                            <td>
+                                <a href="{{ url_for('book.show', book_id=item.get('book_id')) }}">Ссылка</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <h3>Здесь пока пусто</h3>
+    {% endif %}
+</div>
+{% endblock %}

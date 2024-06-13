@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="title-area position-relative">
+    <h1 class="my-5">Недавно просмотренные книги</h1>
+    <hr>
+    {% for item in history %}
+        <div class="h-100 w-100 py-5 d-flex text-center position-relative">
+            <div class="m-auto">
+                <h1 class="title mb-5 font-weight-bold">{{ item.book.name }}</h1>
+                <img src="{{ url_for('image', image_id=item.book.cover_id) }}" alt="Cover of book" height="400">
+                <p class="my-3 mx-auto">
+                    Рейтинг | <span>★</span> <span>{{ average_score }}</span>
+                </p>
+                <div class="container">
+                    <div class="book-desc">
+                        <h2 class="desc mt-5 mb-3">Описание книги</h2>
+                        <p class="description w-75 mb-5 mx-auto">
+                            {{ item.book.markdown_desc | safe }}
+                        </p>
+                    </div>
+
+                    <div class="book-info">
+                        <h2 class="info mt-5 mb-4">Сведения о книге</h2>
+                        <div class="row">
+                            <p class="year w-50">
+                                <b>Год издания: </b>{{ item.book.year }} год
+                            </p>
+                            <p class="publisher w-50">
+                                <b>Издательство: </b>{{ item.book.publisher }}
+                            </p>
+                        </div>
+
+                        <div class="row">
+                            <p class="year w-50">
+                                <b>Автор: </b>{{ item.book.author }}
+                            </p>
+                            <p class="publisher w-50">
+                                <b>Объем книги: </b>{{ item.book.volume }} страниц
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+    {% endfor %}
+</div>
+{% endblock %}

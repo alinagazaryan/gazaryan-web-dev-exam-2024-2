@@ -16,5 +16,5 @@ class UsersPolicy:
     def remove(self):
         return current_user.is_admin
 
-    # def show_log(self):
-    #     return current_user.is_admin
+    def check_logs(self):
+        return current_user.is_admin

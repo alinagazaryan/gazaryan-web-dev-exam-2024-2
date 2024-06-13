@@ -1,0 +1,47 @@
+{% extends 'history/base.html' %}
+{% from 'pagination.html' import render_pagination %}
+
+{% block tab_content %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>№</th>
+            <th>ФИО</th>
+            <th>Автор</th>
+            <th>Книга</th>
+            <th>Дата и время просмотра</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for item in data %}
+            <tr>
+                <td>
+                    {{loop.index + ((pagination.page - 1) * pagination.per_page)}}
+                </td>
+                <td>
+                    {{ item.get('full_name') }}
+                </td>
+                <td>
+                    {{ item.get('author') }}
+                </td>
+                <td>
+                    {{ item.get('name') }} 
+                </td>
+                <td>
+                    {{ item.get('created_at') }}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="mb-5">
+    {{ render_pagination(pagination, request.endpoint) }}
+</div>
+
+{% if data | length != 0 %}
+    <a class="btn btn-primary ms-4 mb-4" href="{{ url_for('history.users_activity', download_csv_file=True) }}">Экспорт в CSV</a>
+{% endif %}
+
+{% endblock %}

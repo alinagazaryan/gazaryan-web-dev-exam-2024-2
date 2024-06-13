@@ -1,10 +1,11 @@
-import bleach
+import bleach, datetime
+from sqlalchemy import func
 from auth import permission_check
 from flask_login import current_user
 from flask_login import login_required
 from sqlalchemy.exc import IntegrityError
 from tools import ImageSaver, ImageDeleter
-from models import db, Book, Genre, LinkTableBookGenre, Review, Image
+from models import db, Book, Genre, LinkTableBookGenre, Review, Image, History
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 
 bp = Blueprint('book', __name__, url_prefix='/book')
@@ -22,6 +23,48 @@ def insert_data_into_table_book_genres(book, choice_genres):
     for genre_id in choice_genres:
         book_genre = LinkTableBookGenre(book_id=book.id, genre_id=genre_id)
         db.session.add(book_genre)
+
+@bp.route('/popular')
+def popular_books():
+    three_months_ago = datetime.datetime.now() - datetime.timedelta(days=3 * 30)
+
+    records = History.query.with_entities(History.book_id).filter(
+        History.created_at >= three_months_ago).group_by(
+        History.book_id).order_by(func.count(History.book_id).desc()).limit(5).all()
+    
+    data = list()
+    
+    for record in sum(list(map(list, records)), list()):
+        book = db.session.query(Book).filter(Book.id == record).first()
+        reviews_list = db.session.query(Review).filter(Review.book_id == book.id).all()
+
+        try:
+            average_score = sum(review.mark for review in reviews_list) / len(reviews_list)
+        except ZeroDivisionError:
+            average_score = 0
+
+        data.append({
+            'book_id': book.id,
+            'cover': book.cover_id,
+            'name': book.name,
+            'author': book.author,
+            'average_score': average_score
+        })
+
+    return render_template('popular_books.html', data=data)
+
+
+@bp.route('/recently')
+def recently_books():
+    # исключение на то, если пользователь AnonimousUserMixin, т.к. у анонимного юзера нет свойства current_user
+    try:
+        history = db.session.query(History).distinct(History.book_id).filter(History.user_id == current_user.id).order_by(
+            History.created_at.desc()).limit(5).all()
+    except AttributeError:
+        history = db.session.query(History).filter(History.user_id == -1).order_by(
+            History.created_at.desc()).limit(5).all()
+
+    return render_template('recently_books.html', history=history)
 
 @bp.route('/new')
 @login_required
@@ -80,6 +123,23 @@ def add():
     
 @bp.route('/<int:book_id>/show', methods=['GET', 'POST'])
 def show(book_id):
+    # исключение на то, если пользователь AnonimousUserMixin, т.к. у анонимного юзера нет свойства current_user
+    try:
+        count = History.query.filter(History.user_id == current_user.id, History.book_id == book_id, 
+            func.date(History.created_at) == datetime.date.today()).count()
+    except AttributeError:
+        count = History.query.filter(History.user_id == -1, History.book_id == book_id, 
+            func.date(History.created_at) == datetime.date.today()).count()
+
+    if count < 10:
+        # исключение на то, если пользователь AnonimousUserMixin, т.к. у анонимного юзера нет свойства current_user
+        try:
+            db.session.add(History(book_id=book_id, user_id=current_user.id))
+        except AttributeError:
+            db.session.add(History(book_id=book_id, user_id=-1))
+
+        db.session.commit()
+
     book = db.session.query(Book).filter(Book.id == book_id).first()
 
     reviews_list = db.session.query(Review).filter(Review.book_id == book.id).all()
@@ -149,7 +209,7 @@ def edit(book_id):
         genres_list=genres
     )
 
-@bp.route('/<int:book_id>/remove', methods=['GET', 'POST'])
+@bp.route('/<int:book_id>/remove', methods=['POST'])
 @login_required
 @permission_check('remove')
 def remove(book_id):

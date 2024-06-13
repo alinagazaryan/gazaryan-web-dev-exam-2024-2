@@ -13,14 +13,30 @@
     <header>
         <nav class="navbar navbar-dark bg-secondary">
             <div class="d-flex container-fluid">
-                <div class="logo navbar-brand">
-                    <a href="{{ url_for('index') }}">
-                        <img class="img-fluid" src="{{ url_for('static', filename='images/logo.png') }}" alt="polytech-logo">
-                    </a>
-                </div>
+                <div class="d-flex gap-4">
+                    <div class="logo navbar-brand">
+                        <a href="{{ url_for('index') }}">
+                            <img class="img-fluid" src="{{ url_for('static', filename='images/logo.png') }}" alt="polytech-logo">
+                        </a>
+                    </div>
 
-                <div class="align-items-start">
-                    <a class="link-light link-offset-2 link-underline link-underline-opacity-0" href="#">Популярные книги</a>
+                    <div class="header-links d-flex gap-3">
+                        <div>
+                            <a class="link-light link-offset-2 link-underline link-underline-opacity-0" href="{{ url_for('book.popular_books') }}">Популярные книги</a>
+                        </div>
+                        
+                        {% if current_user.user_actions_history | length != 0 %}
+                            <div>
+                                <a class="link-light link-offset-2 link-underline link-underline-opacity-0" href="{{ url_for('book.recently_books') }}">Просмотренные книги</a>
+                            </div>
+                        {% endif %}
+
+                        {% if current_user.is_authenticated and current_user.can('check_logs') %}
+                            <div>
+                                <a class="link-light link-offset-2 link-underline link-underline-opacity-0" href="{{ url_for('history.users_activity') }}">Статистика по книгам</a>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             
                 <div class="header-right-side">
@@ -65,7 +81,7 @@
      </main>
 
     <footer class="bg-secondary text-white d-flex flex-column align-items-center justify-content-center py-3">
-        &copy; Газарян Алина Александровна, студентка группы 221-332
+        &copy; Газарян Алина Александровна, студентка группы 211-332
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"

@@ -6,6 +6,10 @@
     display: flex;
 }
 
+.header-links {
+    transform: translate(0, 35%);
+}
+
 .fio-container {
     transform: translate(-10%, 20%);
 }
@@ -14,7 +18,7 @@
     color: white;
 }
 
-.main h1 {
+.main h1, h3 {
     text-align: center;
 }
 
@@ -59,4 +63,11 @@
 .add-review-button button {
     margin-bottom: 0px !important;
     margin-left: 0px !important;
+}
+.form-group {
+    width: 15%;
+}
+
+.button-book-stat {
+    transform: translate(-20%, 60%);
 }

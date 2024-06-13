@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <ul class="nav nav-tabs mt-5">
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'history.users_activity' %}active{% endif %}" aria-current="page"
+            href="{{ url_for('history.users_activity') }}">Журнал действий пользователей</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'history.books_statistic' %}active{% endif %}" aria-current="page"
+            href="{{ url_for('history.books_statistic') }}">Статистика просмотра книг</a>
+        </li>
+    </ul>
+    {% block tab_content %}
+    {% endblock %}
+{% endblock %}
