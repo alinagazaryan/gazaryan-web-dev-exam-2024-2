@@ -25,11 +25,9 @@
                             <a class="link-light link-offset-2 link-underline link-underline-opacity-0" href="{{ url_for('book.popular_books') }}">Популярные книги</a>
                         </div>
                         
-                        {% if current_user.user_actions_history | length != 0 %}
-                            <div>
-                                <a class="link-light link-offset-2 link-underline link-underline-opacity-0" href="{{ url_for('book.recently_books') }}">Просмотренные книги</a>
-                            </div>
-                        {% endif %}
+                        <div>
+                            <a class="link-light link-offset-2 link-underline link-underline-opacity-0" href="{{ url_for('book.recently_books') }}">Просмотренные книги</a>
+                        </div>
 
                         {% if current_user.is_authenticated and current_user.can('check_logs') %}
                             <div>

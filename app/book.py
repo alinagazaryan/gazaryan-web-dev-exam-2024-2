@@ -8,6 +8,8 @@ from tools import ImageSaver, ImageDeleter
 from models import db, Book, Genre, LinkTableBookGenre, Review, Image, History
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 
+from flask_login import login_manager
+
 bp = Blueprint('book', __name__, url_prefix='/book')
 
 BOOKS_PARAMS = [
@@ -53,7 +55,6 @@ def popular_books():
 
     return render_template('popular_books.html', data=data)
 
-
 @bp.route('/recently')
 def recently_books():
     # исключение на то, если пользователь AnonimousUserMixin, т.к. у анонимного юзера нет свойства current_user
@@ -63,8 +64,29 @@ def recently_books():
     except AttributeError:
         history = db.session.query(History).filter(History.user_id == -1).order_by(
             History.created_at.desc()).limit(5).all()
+        
+    unique_books = list()
+    unique_books_id = list()
+        
+    for item in history:
+        if item.book_id not in unique_books_id:
+            unique_books_id.append(item.book_id)
+            unique_books.append(item)
 
-    return render_template('recently_books.html', history=history)
+    average_score_list = list()
+
+    for book_id in unique_books_id:
+        reviews_list = db.session.query(Review).filter(Review.book_id == book_id).all()
+        try:
+            average_score_list.append(sum(review.mark for review in reviews_list) / len(reviews_list))
+        except ZeroDivisionError:
+            average_score_list.append(0)
+    
+    return render_template(
+        'recently_books.html', 
+        history=unique_books,
+        average_score_list=average_score_list
+    )
 
 @bp.route('/new')
 @login_required
@@ -219,11 +241,13 @@ def remove(book_id):
 
     image = db.session.query(Image).filter(Image.id == book.cover_id).first()
 
+    books_used_cover = len(db.session.query(Book).filter(Book.cover_id == image.id).all())
+
     image_deleter = ImageDeleter(image)
 
     try:
         db.session.delete(book)
-        image_deleter.delete()
+        image_deleter.delete(books_used_cover)
 
         for item in book_genres:
             db.session.delete(item)

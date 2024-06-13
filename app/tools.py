@@ -43,10 +43,11 @@ class ImageDeleter:
     def __init__(self, img):
         self.img = img
 
-    def delete(self):
+    def delete(self, books_used_cover):
         try:
-            os.remove(os.path.join(UPLOAD_FOLDER, self.img.storage_filename))
-            db.session.delete(self.img)
-            db.session.commit()
+            if books_used_cover == 1:
+                os.remove(os.path.join(UPLOAD_FOLDER, self.img.storage_filename))
+                db.session.delete(self.img)
+                db.session.commit()
         except SQLAlchemyError:
             db.session.rollback()
