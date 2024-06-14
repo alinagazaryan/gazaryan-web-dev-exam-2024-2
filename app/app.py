@@ -5,7 +5,7 @@ from flask_migrate import Migrate
 from sqlalchemy.exc import SQLAlchemyError
 from auth import bp as auth_bp, init_login_manager
 from models import db, Image, Book, Review, LinkTableBookGenre, Genre
-from flask import Flask, render_template, send_from_directory, request
+from flask import Flask, render_template, send_from_directory, request, session
 
 app = Flask(__name__)
 application = app
@@ -29,6 +29,7 @@ app.register_blueprint(history_bp)
 
 @app.route('/')
 def index():
+    session['save_input_data'] = {}
     page = request.args.get('page', 1, type=int)
     books_list = Book.query.order_by(Book.year.desc())
     pagination = books_list.paginate(page=page, per_page=PER_PAGE)
@@ -73,6 +74,7 @@ def index():
     
 @app.route('/images/<image_id>')
 def image(image_id):
+    session['save_input_data'] = {}
     img = db.get_or_404(Image, image_id)
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                img.storage_filename)

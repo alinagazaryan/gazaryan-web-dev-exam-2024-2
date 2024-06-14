@@ -6,7 +6,7 @@ from flask_login import login_required
 from sqlalchemy.exc import IntegrityError
 from tools import ImageSaver, ImageDeleter
 from models import db, Book, Genre, LinkTableBookGenre, Review, Image, History
-from flask import Blueprint, render_template, request, flash, redirect, url_for, make_response
+from flask import Blueprint, render_template, request, flash, redirect, url_for, make_response, session
 
 bp = Blueprint('book', __name__, url_prefix='/book')
 
@@ -26,6 +26,7 @@ def insert_data_into_table_book_genres(book, choice_genres):
 
 @bp.route('/popular')
 def popular_books():
+    session['save_input_data'] = {}
     three_months_ago = datetime.datetime.now() - datetime.timedelta(days=3 * 30)
 
     records = History.query.with_entities(History.book_id).filter(
@@ -55,6 +56,7 @@ def popular_books():
 
 @bp.route('/recently')
 def recently_books():
+    session['save_input_data'] = {}
     average_score_list = list()
 
     try:
@@ -93,8 +95,18 @@ def add():
     f = request.files.get('background_img')
     img = None
 
+    session['save_input_data'] = params()
+
     if any(value == None for value in params().values()):
         flash(f'Заполните все поля', 'warning')
+        return render_template('book_add.html', genres_list=genres)
+    
+    if not params().get('year').isdigit():
+        flash(f'Поле "Год издания" должно быть числом', 'warning')
+        return render_template('book_add.html', genres_list=genres)
+
+    if not params().get('volume').isdigit():
+        flash(f'Поле "Объем книги" должно быть числом', 'warning')
         return render_template('book_add.html', genres_list=genres)
 
     if f and f.filename:
@@ -123,6 +135,7 @@ def add():
 
         if ImageSaver(f).download(img):
             flash('Книга была успешно добавлена!', 'success')
+            session['save_input_data'] = {}
             return redirect(url_for('book.show', book_id=book.id))
         else:
             flash('Возникла ошибка при загрузке обложки', 'danger')
@@ -132,9 +145,10 @@ def add():
         flash('При сохранении данных возникла ошибка. Проверьте корректность введённых данных.', 'danger')
         db.session.rollback()
         return render_template('book_add.html', genres_list=genres)
-    
+  
 @bp.route('/<int:book_id>/show', methods=['GET', 'POST'])
 def show(book_id):
+    session['save_input_data'] = {}
     # исключение на то, если пользователь AnonimousUserMixin, т.к. у анонимного юзера нет свойства current_user
     try:
         count = History.query.filter(History.user_id == current_user.id, History.book_id == book_id, 
@@ -247,6 +261,7 @@ def edit(book_id):
 @login_required
 @permission_check('remove')
 def remove(book_id):
+    session['save_input_data'] = {}
     book = db.session.query(Book).filter(Book.id == book_id).first()
 
     book_genres = db.session.query(LinkTableBookGenre).filter(LinkTableBookGenre.book_id == book_id).all()
