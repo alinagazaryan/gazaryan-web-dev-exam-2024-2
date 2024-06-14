@@ -6,9 +6,7 @@ from flask_login import login_required
 from sqlalchemy.exc import IntegrityError
 from tools import ImageSaver, ImageDeleter
 from models import db, Book, Genre, LinkTableBookGenre, Review, Image, History
-from flask import Blueprint, render_template, request, flash, redirect, url_for
-
-from flask_login import login_manager
+from flask import Blueprint, render_template, request, flash, redirect, url_for, make_response
 
 bp = Blueprint('book', __name__, url_prefix='/book')
 
@@ -57,34 +55,26 @@ def popular_books():
 
 @bp.route('/recently')
 def recently_books():
-    # исключение на то, если пользователь AnonimousUserMixin, т.к. у анонимного юзера нет свойства current_user
-    try:
-        history = db.session.query(History).distinct(History.book_id).filter(History.user_id == current_user.id).order_by(
-            History.created_at.desc()).limit(5).all()
-    except AttributeError:
-        history = db.session.query(History).filter(History.user_id == -1).order_by(
-            History.created_at.desc()).limit(5).all()
-        
-    unique_books = list()
-    unique_books_id = list()
-        
-    for item in history:
-        if item.book_id not in unique_books_id:
-            unique_books_id.append(item.book_id)
-            unique_books.append(item)
-
     average_score_list = list()
 
-    for book_id in unique_books_id:
-        reviews_list = db.session.query(Review).filter(Review.book_id == book_id).all()
-        try:
-            average_score_list.append(sum(review.mark for review in reviews_list) / len(reviews_list))
-        except ZeroDivisionError:
-            average_score_list.append(0)
-    
+    try:
+        recently_books = request.cookies.get(f'recently_books_{current_user.id}')
+    except AttributeError:
+        recently_books = request.cookies.get('recently_books_anonymous')
+
+    if recently_books:
+        recently_books = list(map(Book.query.get, recently_books.split(',')))
+
+        for book in recently_books:
+            reviews_list = db.session.query(Review).filter(Review.book_id == book.id).all()
+            try:
+                average_score_list.append(sum(review.mark for review in reviews_list) / len(reviews_list))
+            except ZeroDivisionError:
+                average_score_list.append(0)
+
     return render_template(
-        'recently_books.html', 
-        history=unique_books,
+        'recently_books.html',
+        history=recently_books,
         average_score_list=average_score_list
     )
 
@@ -178,14 +168,36 @@ def show(book_id):
     except ZeroDivisionError:
         average_score = 0
 
-    return render_template(
-        'show.html',
-        book=book,
+    try:
+        recently_books = request.cookies.get(f'recently_books_{current_user.id}')
+    except AttributeError:
+        recently_books = request.cookies.get('recently_books_anonymous')
+
+    recently_books = recently_books.split(',') if recently_books else list()
+
+    if str(book_id) in recently_books:
+        recently_books.remove(str(book_id))
+        recently_books.insert(0, str(book_id))
+    else:
+        recently_books.insert(0, str(book_id))
+
+    recently_books_str = ','.join(recently_books[:5])
+
+    response = make_response(render_template(
+        'show.html', 
+        book=book, 
         reviews_list=reviews_list,
         average_score=average_score,
         number_of_reviews=len(reviews_list),
         can_write_review=can_write_review
-    )
+    ))
+
+    try:
+        response.set_cookie(f'recently_books_{current_user.id}', recently_books_str)
+    except AttributeError:
+        response.set_cookie('recently_books_anonymous', recently_books_str)
+
+    return response
 
 @bp.route('/<int:book_id>/edit', methods=['GET', 'POST'])
 @login_required

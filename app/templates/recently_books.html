@@ -3,13 +3,13 @@
 {% block content %}
 <div class="title-area position-relative">
     <h1 class="my-5">Недавно просмотренные книги</h1>
-    {% if history | length != 0 %}
+    {% if history != none %}
         <hr>
-        {% for item in history %}
+        {% for book in history %}
             <div class="h-100 w-100 py-5 d-flex text-center position-relative">
                 <div class="m-auto">
-                    <h1 class="title mb-5 font-weight-bold">{{ item.book.name }}</h1>
-                    <img src="{{ url_for('image', image_id=item.book.cover_id) }}" alt="Cover of book" height="400">
+                    <h1 class="title mb-5 font-weight-bold">{{ book.name }}</h1>
+                    <img src="{{ url_for('image', image_id=book.cover_id) }}" alt="Cover of book" height="400">
                     <p class="my-3 mx-auto">
                         Рейтинг | <span>★</span> <span>{{ average_score_list[loop.index - 1] }}</span>
                     </p>
@@ -17,7 +17,7 @@
                         <div class="book-desc">
                             <h2 class="desc mt-5 mb-3">Описание книги</h2>
                             <p class="description w-75 mb-5 mx-auto">
-                                {{ item.book.markdown_desc | safe }}
+                                {{ book.markdown_desc | safe }}
                             </p>
                         </div>
 
@@ -25,19 +25,19 @@
                             <h2 class="info mt-5 mb-4">Сведения о книге</h2>
                             <div class="row">
                                 <p class="year w-50">
-                                    <b>Год издания: </b>{{ item.book.year }} год
+                                    <b>Год издания: </b>{{ book.year }} год
                                 </p>
                                 <p class="publisher w-50">
-                                    <b>Издательство: </b>{{ item.book.publisher }}
+                                    <b>Издательство: </b>{{ book.publisher }}
                                 </p>
                             </div>
 
                             <div class="row">
                                 <p class="year w-50">
-                                    <b>Автор: </b>{{ item.book.author }}
+                                    <b>Автор: </b>{{ book.author }}
                                 </p>
                                 <p class="publisher w-50">
-                                    <b>Объем книги: </b>{{ item.book.volume }} страниц
+                                    <b>Объем книги: </b>{{ book.volume }} страниц
                                 </p>
                             </div>
                         </div>
