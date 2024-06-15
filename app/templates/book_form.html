@@ -18,7 +18,7 @@
                 <div class="col-md-6 d-flex flex-column">
                     <div class="mb-3">
                         <label for="name">Название</label>
-                        {% if session.get('save_input_data') != none %}
+                        {% if session.get('save_input_data') | length != 0 %}
                             <input class="form-control" type="text" name="name" id="name" value="{{ session.get('save_input_data').get('name') or '' }}">
                         {% else %}
                             <input class="form-control" type="text" name="name" id="name" value="{% if book != none %}{{ book.name }}{% endif %}">
@@ -26,7 +26,7 @@
                     </div>
                     <div class="mb-3 d-flex flex-column flex-grow-1">
                         <label for="short_description">Краткое описание</label>
-                        {% if session.get('save_input_data') != none %}
+                        {% if session.get('save_input_data') | length != 0 %}
                             <textarea 
                                 class="form-control flex-grow-1" 
                                 name="short_desc" 
@@ -63,7 +63,7 @@
                             <select class="form-select" name="genres_filter" multiple>
                                 <option value="default" selected>Выберите жанр</option>
                                 {% for genre in genres_list %}
-                                    <option selected value="{{ genre.id }}">{{ genre.name }}</option>
+                                    <option value="{{ genre.id }}">{{ genre.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -75,7 +75,7 @@
                 <div class="col-md-6 d-flex flex-column">
                     <div class="mb-3">
                         <label for="year">Год издания</label>
-                        {% if session.get('save_input_data') != none %}
+                        {% if session.get('save_input_data') | length != 0 %}
                             <input class="form-control" type="text" name="year" id="year" value="{{ session.get('save_input_data').get('year') or '' }}">
                         {% else %}
                             <input class="form-control" type="text" name="year" id="year" value="{% if book != none %}{{ book.year }}{% endif %}">
@@ -85,7 +85,7 @@
                 <div class="col-md-6 d-flex flex-column">
                     <div class="mb-3 d-flex flex-column flex-grow-1">
                         <label for="author">Автор</label>
-                        {% if session.get('save_input_data') != none %}
+                        {% if session.get('save_input_data') | length != 0 %}
                             <input class="form-control" type="text" name="author" id="author" value="{{ session.get('save_input_data').get('author') or '' }}">
                         {% else %}
                             <input class="form-control" type="text" name="author" id="author" value="{% if book != none %}{{ book.author }}{% endif %}">
@@ -98,7 +98,7 @@
                 <div class="col-md-6 d-flex flex-column">
                     <div class="mb-3">
                         <label for="publisher">Издательство</label>
-                        {% if session.get('save_input_data') != none %}
+                        {% if session.get('save_input_data') | length != 0 %}
                             <input class="form-control" type="text" name="publisher" id="publisher" value="{{ session.get('save_input_data').get('publisher') or '' }}">
                         {% else %}
                             <input class="form-control" type="text" name="publisher" id="publisher" value="{% if book != none %}{{ book.publisher }}{% endif %}">
@@ -108,7 +108,7 @@
                 <div class="col-md-6 d-flex flex-column">
                     <div class="mb-3 d-flex flex-column flex-grow-1">
                         <label for="volume">Объем книги</label>
-                        {% if session.get('save_input_data') != none %}
+                        {% if session.get('save_input_data') | length != 0 %}
                             <input class="form-control" type="text" name="volume" id="volume" value="{{ session.get('save_input_data').get('volume') or '' }}">
                         {% else %}
                             <input class="form-control" type="text" name="volume" id="volume" value="{% if book != none %}{{ book.volume }}{% endif %}">

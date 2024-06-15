@@ -217,6 +217,7 @@ def show(book_id):
 @login_required
 @permission_check('edit')
 def edit(book_id):
+    session['save_input_data'] = {}
     book = Book.query.filter_by(id=book_id).first()
 
     genres = list(item for item in db.session.execute(db.select(Genre)).scalars().all())
@@ -224,6 +225,18 @@ def edit(book_id):
     if request.method == 'POST':
         book = Book.query.filter_by(id=book_id).first()
 
+        if any(value == None for value in params().values()):
+            flash(f'Поля не должны быть пустыми', 'warning')
+            return render_template('book_edit.html', genres_list=genres, book=book)
+        
+        if not params().get('year').isdigit():
+            flash(f'Поле "Год издания" должно быть числом', 'warning')
+            return render_template('book_edit.html', genres_list=genres, book=book)
+
+        if not params().get('volume').isdigit():
+            flash(f'Поле "Объем книги" должно быть числом', 'warning')
+            return render_template('book_edit.html', genres_list=genres, book=book)
+        
         genres_from_form = request.form.getlist('genres_filter')
     
         if genres_from_form[0] == 'default':
