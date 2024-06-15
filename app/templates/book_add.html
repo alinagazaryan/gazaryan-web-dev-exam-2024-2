@@ -2,5 +2,5 @@
 {% from 'book_form.html' import render_book_form %}
 
 {% block content %}
-    {{ render_book_form(genres_list, action="add") }}
+    {{ render_book_form(genres_list, choice_genres, action="add") }}
 {% endblock %}

@@ -222,6 +222,8 @@ def edit(book_id):
 
     genres = list(item for item in db.session.execute(db.select(Genre)).scalars().all())
 
+    choice_genres = [item.genre_id for item in db.session.query(LinkTableBookGenre).filter(LinkTableBookGenre.book_id == book_id).all()]
+
     if request.method == 'POST':
         book = Book.query.filter_by(id=book_id).first()
 
@@ -267,7 +269,8 @@ def edit(book_id):
     return render_template(
         'book_edit.html', 
         book=book, 
-        genres_list=genres
+        genres_list=genres, 
+        choice_genres=choice_genres
     )
 
 @bp.route('/<int:book_id>/remove', methods=['POST'])
@@ -308,8 +311,8 @@ def review_add(book_id):
             flash('Вы уже оставляли рецензию на эту книгу.', 'warning')
             return redirect(url_for('book.show', book_id=book_id))
 
-        text = request.form['text']
-        mark = bleach.clean(request.form['mark'])
+        text = bleach.clean(request.form['text'])
+        mark = request.form['mark']
         
         try:
             db.session.add(
